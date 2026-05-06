@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Petit Coin — Vocabulaire</title>
+<style>
+
+/* ── reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── base ── */
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  background: #1c1108;
+  color: #f0e6d0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── awning ── */
+.awning { display: flex; height: 22px; }
+.stripe { flex: 1; }
+.stripe:nth-child(odd)  { background: #8B1A1A; }
+.stripe:nth-child(even) { background: #f0e6d0; }
+
+/* ── layout ── */
+.wrap { padding: 24px 18px 52px; max-width: 680px; margin: 0 auto; }
+
+/* ── header ── */
+.cafe-name {
+  font-family: Georgia, serif;
+  font-size: 26px;
+  font-weight: bold;
+  color: #f0e6d0;
+  letter-spacing: .05em;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.cafe-sub {
+  font-family: Georgia, serif;
+  font-size: 13px;
+  font-style: italic;
+  color: #c4a96a;
+  letter-spacing: .08em;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.gold-rule {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c4a96a 15%, #c4a96a 85%, transparent);
+  margin: 0 0 20px;
+}
+
+/* ── instruction box ── */
+.instruction {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(196,169,106,.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #c8b88a;
+  line-height: 1.65;
+  margin-bottom: 22px;
+}
+.instruction strong { color: #f0e6d0; }
+
+/* ── bank ── */
+.bank-label {
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #7a6a4a;
+  margin-bottom: 8px;
+  font-family: Verdana, sans-serif;
+}
+.word-bank {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 52px;
+  padding: 12px;
+  background: rgba(0,0,0,.38);
+  border: 1px dashed rgba(196,169,106,.22);
+  border-radius: 10px;
+  margin-bottom: 22px;
+}
+
+/* ── chips ── */
+.chip {
+  background: #8B1A1A;
+  color: #f0e6d0;
+  font-family: Georgia, serif;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: grab;
+  user-select: none;
+  border: 1px solid rgba(255,255,255,.14);
+  transition: transform .15s, box-shadow .15s, opacity .15s;
+  line-height: 1;
+}
+.chip:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.55); }
+.chip.dragging { opacity: .3; cursor: grabbing; }
+.chip.gone { display: none; }
+
+/* ── cards grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(196,169,106,.2);
+  border-radius: 12px;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  transition: border-color .2s, background .2s;
+}
+.card.over    { border-color: #c4a96a; background: rgba(196,169,106,.1); }
+.card.correct { border-color: #4caf50; background: rgba(76,175,80,.1); }
+.card.wrong   {
+  border-color: #ef5350;
+  background: rgba(239,83,80,.1);
+  animation: shake .32s ease;
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25%      { transform: translateX(-6px); }
+  75%      { transform: translateX(6px); }
+}
+
+.card-emoji  { font-size: 28px; line-height: 1; }
+
+.card-source {
+  font-size: 10px;
+  color: #5a4e36;
+  text-align: center;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-family: Verdana, sans-serif;
+}
+
+.card-def {
+  font-size: 12px;
+  color: #b09a6e;
+  text-align: center;
+  font-family: Georgia, serif;
+  font-style: italic;
+  line-height: 1.45;
+  flex: 1;
+}
+
+.drop {
+  min-height: 36px;
+  width: 100%;
+  border: 1.5px dashed rgba(196,169,106,.28);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: rgba(255,255,255,.2);
+  font-family: Verdana, sans-serif;
+  transition: border-color .2s;
+}
+
+.placed-chip {
+  font-family: Georgia, serif;
+  font-size: 13px;
+  color: #f0e6d0;
+  background: #8B1A1A;
+  padding: 5px 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+}
+.placed-chip.locked {
+  background: #2e7d32;
+  cursor: default;
+}
+
+/* ── feedback ── */
+.feedback {
+  height: 44px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: bold;
+  font-family: Verdana, sans-serif;
+  opacity: 0;
+  transition: opacity .3s;
+  margin-bottom: 12px;
+}
+.feedback.show { opacity: 1; }
+.feedback.good {
+  background: rgba(76,175,80,.14);
+  color: #81c784;
+  border: 1px solid rgba(76,175,80,.32);
+}
+.feedback.bad {
+  background: rgba(239,83,80,.11);
+  color: #ef9a9a;
+  border: 1px solid rgba(239,83,80,.28);
+}
+
+/* ── buttons ── */
+.check-btn {
+  width: 100%;
+  padding: 14px;
+  background: #8B1A1A;
+  color: #f0e6d0;
+  border: none;
+  border-radius: 8px;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  cursor: pointer;
+  letter-spacing: .03em;
+  transition: background .2s, transform .1s;
+}
+.check-btn:hover    { background: #6e1515; }
+.check-btn:active   { transform: scale(.98); }
+.check-btn:disabled { background: #3a3020; color: #7a6a4a; cursor: default; }
+
+.enter-btn {
+  width: 100%;
+  padding: 14px;
+  background: #2e7d32;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background .2s;
+  margin-top: 10px;
+  display: none;
+}
+.enter-btn.show  { display: block; }
+.enter-btn:hover { background: #1b5e20; }
+
+.score {
+  text-align: center;
+  font-size: 11px;
+  color: #7a6a4a;
+  margin-top: 8px;
+  font-family: Verdana, sans-serif;
+}
+
+</style>
+</head>
+<body>
+
+<!-- awning stripes -->
+<div class="awning">
+  <div class="stripe"></div><div class="stripe"></div><div class="stripe"></div>
+  <div class="stripe"></div><div class="stripe"></div><div class="stripe"></div>
+  <div class="stripe"></div><div class="stripe"></div><div class="stripe"></div>
+  <div class="stripe"></div><div class="stripe"></div><div class="stripe"></div>
+  <div class="stripe"></div><div class="stripe"></div><div class="stripe"></div>
+  <div class="stripe"></div><div class="stripe"></div><div class="stripe"></div>
+  <div class="stripe"></div><div class="stripe"></div>
+</div>
+
+<div class="wrap">
+
+  <div class="cafe-name">Le Petit Coin</div>
+  <div class="cafe-sub">Avant d&rsquo;entrer &mdash; apprenez les mots cl&eacute;s</div>
+  <hr class="gold-rule">
+
+  <div class="instruction">
+    <strong>Bienvenue !</strong> Ces mots viennent du menu et des conversations du caf&eacute;.
+    Glissez chaque mot vers la bonne d&eacute;finition.
+    Vous devez tout r&eacute;ussir avant d&rsquo;entrer !
+  </div>
+
+  <div class="bank-label">Les mots et expressions</div>
+  <div class="word-bank" id="bank"></div>
+  <div class="grid"      id="grid"></div>
+
+  <div class="feedback" id="fb"></div>
+  <button class="check-btn" id="checkBtn" onclick="check()">V&eacute;rifier &rarr;</button>
+  <button class="enter-btn" id="enterBtn" onclick="onEnter()">Entrer au caf&eacute; &rarr;</button>
+  <div class="score" id="score"></div>
+
+</div>
+
+<script>
+/* ── vocabulary data ──────────────────────────────────────────────────────
+   RULE: the answer word must NOT appear anywhere in source or def.        */
+var vocab = [
+  {
+    word:   "mijot\u00e9(e)",
+    emoji:  "\uD83C\uDF72",
+    source: "Menu \u2014 plats principaux",
+    def:    "cuit tr\u00e8s lentement \u00e0 feu doux pendant plusieurs heures \u2014 comme le boeuf bourguignon",
+    answer: "mijot\u00e9(e)"
+  },
+  {
+    word:   "une entr\u00e9e",
+    emoji:  "\uD83E\uDD57",
+    source: "Menu \u2014 premi\u00e8re section",
+    def:    "le premier plat du repas \u2014 attention, ce n\u2019est pas \u00ab the main course \u00bb !",
+    answer: "une entr\u00e9e"
+  },
+  {
+    word:   "lourd / l\u00e9ger",
+    emoji:  "\u2696\uFE0F",
+    source: "Table 1 \u2014 Camille et Lucas",
+    def:    "deux contraires : difficile \u00e0 dig\u00e9rer / facile \u00e0 dig\u00e9rer. Camille pr\u00e9f\u00e8re le deuxi\u00e8me !",
+    answer: "lourd / l\u00e9ger"
+  },
+  {
+    word:   "au choix",
+    emoji:  "\u2615",
+    source: "Menu \u2014 boissons",
+    def:    "vous d\u00e9cidez vous-m\u00eame selon votre pr\u00e9f\u00e9rence \u2014 le serveur attend votre d\u00e9cision !",
+    answer: "au choix"
+  },
+  {
+    word:   "le plat principal",
+    emoji:  "\uD83C\uDF7D\uFE0F",
+    source: "Menu \u2014 deuxi\u00e8me section",
+    def:    "le repas le plus important \u2014 boeuf, poulet, saumon\u2026 C\u2019est le c\u0153ur du repas.",
+    answer: "le plat principal"
+  },
+  {
+    word:   "savoureux",
+    emoji:  "\uD83D\uDE0B",
+    source: "Table 2 \u2014 Antoine le serveur",
+    def:    "quand la nourriture a un tr\u00e8s bon go\u00fbt et que vous voulez continuer \u00e0 manger",
+    answer: "savoureux"
+  },
+  {
+    word:   "Je voudrais",
+    emoji:  "\uD83D\uDDE3\uFE0F",
+    source: "\u00c0 utiliser au comptoir !",
+    def:    "la formule la plus polie pour commander quelque chose au restaurant \u2014 Marcel adore l\u2019entendre !",
+    answer: "Je voudrais"
+  },
+  {
+    word:   "compris(e)",
+    emoji:  "\uD83E\uDDFE",
+    source: "Menu \u2014 bas de page",
+    def:    "d\u00e9j\u00e0 inclus dans le prix \u2014 vous n\u2019avez pas besoin de payer cela en plus",
+    answer: "compris(e)"
+  }
+];
+
+/* ── state ── */
+var dragged = null;
+var placed  = {};   /* card index -> word string */
+var locked  = {};   /* card index -> true        */
+
+/* ── build ── */
+function build() {
+  var bank     = document.getElementById('bank');
+  var grid     = document.getElementById('grid');
+  var shuffled = vocab.slice().sort(function() { return Math.random() - .5; });
+
+  shuffled.forEach(function(item) {
+    var c       = document.createElement('div');
+    c.className = 'chip';
+    c.id        = 'chip-' + item.word;
+    c.textContent = item.word;
+    c.draggable = true;
+    c.addEventListener('dragstart', function() {
+      dragged = item.word;
+      c.classList.add('dragging');
+    });
+    c.addEventListener('dragend', function() {
+      c.classList.remove('dragging');
+    });
+    bank.appendChild(c);
+  });
+
+  vocab.forEach(function(item, i) {
+    var card       = document.createElement('div');
+    card.className = 'card';
+
+    var emoji  = document.createElement('div');
+    emoji.className   = 'card-emoji';
+    emoji.textContent = item.emoji;
+
+    var src  = document.createElement('div');
+    src.className   = 'card-source';
+    src.textContent = item.source;
+
+    var def  = document.createElement('div');
+    def.className   = 'card-def';
+    def.textContent = item.def;
+
+    var zone       = document.createElement('div');
+    zone.className = 'drop';
+    zone.id        = 'drop-' + i;
+    zone.textContent = 'glisser ici';
+
+    card.appendChild(emoji);
+    card.appendChild(src);
+    card.appendChild(def);
+    card.appendChild(zone);
+
+    card.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      if (!locked[i]) card.classList.add('over');
+    });
+    card.addEventListener('dragleave', function() {
+      card.classList.remove('over');
+    });
+    card.addEventListener('drop', function(e) {
+      e.preventDefault();
+      card.classList.remove('over');
+      if (locked[i] || !dragged) return;
+      if (placed[i]) returnToBank(placed[i]);
+      placed[i] = dragged;
+      hideChip(dragged);
+      renderDrop(i, dragged, false);
+      dragged = null;
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+/* ── helpers ── */
+function hideChip(word) {
+  var c = document.getElementById('chip-' + word);
+  if (c) c.classList.add('gone');
+}
+
+function returnToBank(word) {
+  var c = document.getElementById('chip-' + word);
+  if (c) c.classList.remove('gone');
+}
+
+function renderDrop(i, word, isLocked) {
+  var zone       = document.getElementById('drop-' + i);
+  zone.innerHTML = '';
+  var span       = document.createElement('span');
+  span.className = isLocked ? 'placed-chip locked' : 'placed-chip';
+  span.textContent = word;
+  if (!isLocked) {
+    span.onclick = function() {
+      returnToBank(word);
+      delete placed[i];
+      zone.textContent = 'glisser ici';
+      zone.closest('.card').classList.remove('correct', 'wrong');
+    };
+  }
+  zone.appendChild(span);
+}
+
+/* ── check ── */
+function check() {
+  var correct = 0;
+
+  vocab.forEach(function(item, i) {
+    if (!placed[i]) return;
+    var card = document.getElementById('drop-' + i).closest('.card');
+
+    if (placed[i] === item.answer) {
+      correct++;
+      locked[i] = true;
+      card.classList.remove('wrong');
+      card.classList.add('correct');
+      renderDrop(i, placed[i], true);
+    } else {
+      card.classList.remove('correct');
+      card.classList.add('wrong');
+      var wrongWord = placed[i];
+      setTimeout(function() {
+        card.classList.remove('wrong');
+        returnToBank(wrongWord);
+        delete placed[i];
+        var zone = document.getElementById('drop-' + i);
+        zone.textContent = 'glisser ici';
+      }, 650);
+    }
+  });
+
+  var fb        = document.getElementById('fb');
+  var scoreEl   = document.getElementById('score');
+  var remaining = vocab.length - Object.keys(locked).length;
+
+  if (Object.keys(locked).length === vocab.length) {
+    fb.textContent = '\u2713 Parfait ! Vous connaissez tous les mots. Entrez dans le caf\u00e9 !';
+    fb.className   = 'feedback show good';
+    document.getElementById('checkBtn').disabled = true;
+    document.getElementById('enterBtn').classList.add('show');
+    scoreEl.textContent = '';
+  } else {
+    fb.textContent = correct + (correct !== 1 ? ' bonnes r\u00e9ponses' : ' bonne r\u00e9ponse') + ' \u2014 continuez !';
+    fb.className   = 'feedback show bad';
+    scoreEl.textContent = remaining + (remaining !== 1 ? ' mots restants' : ' mot restant');
+  }
+}
+
+/* ── enter button ── */
+function onEnter() {
+  if (typeof sendPrompt === 'function') {
+    sendPrompt('The student has passed the vocabulary gate and is ready to enter the cafe.');
+  } else {
+    var btn = document.getElementById('enterBtn');
+    btn.textContent = '\u2713 Bonne chance au caf\u00e9 !';
+    btn.style.background = '#1b5e20';
+    btn.disabled = true;
+  }
+}
+
+/* ── init ── */
+build();
+</script>
+</body>
+</html>
